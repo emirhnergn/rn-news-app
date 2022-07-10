@@ -1,2 +1,2 @@
-# rn-news-app
+# News App With React-Native
 News App with Firebase / SignUp / Login
