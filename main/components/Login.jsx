@@ -1,26 +1,60 @@
-import { View,Text, StyleSheet,Dimensions, TextInput } from "react-native"
+import { View,Text, StyleSheet,Dimensions, TextInput, TouchableOpacity, ActivityIndicator } from "react-native"
+import { useState } from "react";
+import { loginHandle , registerHandle } from "../firebaseDB/firebase";
+import { useContext } from "react";
+import SiteContext from "../context/SiteContext";
+import { Alert } from "react-native";
 const {width, height} = Dimensions.get('window');
 
-export default function Login() {
+export default function Login({navigation}) {
+  const {data} = useContext(SiteContext)
+  const [state,setState] = useState({
+    mail : '',
+    password : '',
+    spinner : false,
+  })
+  const login = async () =>
+  {
+    setState({...state,spinner:true})
+    const user = await loginHandle(state.mail,state.password)
+    if (user != undefined)
+    {
+      data.setUser(user.uid)
+      navigation.navigate('Home')
+      Alert.alert('Login Success')
+    }
+  }
   return (
     <View style={{ flex: 1}}>
         <View style={{alignItems:'center', marginTop:50}}>
           <Text style={{fontSize: 50, fontWeight:"bold"}}>News App</Text>
         </View>
+        {state.spinner ? <ActivityIndicator size="large" color="#0000ff" /> 
+        :
         <View>
-          <TextInput style={{fontSize: 50, marginTop:20}} placeholder="Username" />
+          <TextInput style={{fontSize: 50, marginTop:20}} placeholder="E-Mail" />
           <TextInput style={{fontSize: 50, marginLeft:10, height:60, marginRight:10, marginBottom:20,
           paddingLeft:12, borderWidth:2, borderColor:"red"}}
+          onChangeText={(mail) => setState({...state,mail})}
+          autoCorrect={false}
+          value = {state.mail}
+          keyboardType="email-address"
           />
           <TextInput style={{fontSize: 50}} placeholder="Password" />
           <TextInput style={{fontSize: 50, marginLeft:10, height:60 , marginRight:10, marginBottom:20,
           borderWidth:2,paddingLeft:12, borderColor:"red"}}
           secureTextEntry={true}
+          onChangeText={(password) => setState({...state,password})}
+          autoCorrect={false}
+          value = {state.password}
           />
-          <View style={{marginLeft:10, marginRight:10, borderWidth:2, borderColor:"red",alignItems:'center', justifyContent:"center", padding:15, borderRadius:25}}>
-            <Text style={{fontSize:30,fontWeight:"bold"}} >Login</Text>
-          </View>
-        </View>
+          <TouchableOpacity onPress={() => login()}>
+            <View style={{marginLeft:10, marginRight:10, borderWidth:2, borderColor:"red",alignItems:'center', justifyContent:"center", padding:15, borderRadius:25}}>
+              <Text style={{fontSize:30,fontWeight:"bold"}} >Login</Text>
+            </View>
+          </TouchableOpacity>
+        </View> }
+        
     </View>
   )
 }
